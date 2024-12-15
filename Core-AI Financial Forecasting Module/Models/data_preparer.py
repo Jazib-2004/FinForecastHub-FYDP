@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 
 
@@ -30,13 +30,18 @@ class DataPreparer:
         - Scale the forecast feature
         """
         # Convert the date column to datetime
-        self.dataset[self.date_index] = pd.to_datetime(self.dataset[self.date_index], format='%y-%b')
+        try:
+        # Attempt to parse the column to datetime
+            self.dataset[self.date_index] = pd.to_datetime(self.dataset[self.date_index], errors='coerce', infer_datetime_format=True)
+            print(f"Successfully converted column '{self.date_index}' to datetime.")
+        except Exception as e:
+            print(f"Error while converting column '{self.date_index}': {e}")
 
         # Set date column as index
         self.dataset.set_index(self.date_index, inplace=True)
 
         # Scale the forecast feature
-        scaler = StandardScaler()
+        scaler = MinMaxScaler()
         dataset_scaled = scaler.fit_transform(self.dataset[[self.forecast_feature]])
         self.crafted_data = pd.DataFrame(dataset_scaled, columns=[self.forecast_feature], index=self.dataset.index)
 

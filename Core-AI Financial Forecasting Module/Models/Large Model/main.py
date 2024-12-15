@@ -32,20 +32,19 @@ def main(file_path,forecast_feature,date_index):
     data_preparer.sort_dataset()
     crafted_sales_data = data_preparer.get_crafted_data()
 
-    print(crafted_sales_data.head())
-    # # train in-sampling model
-    # train_in_sample(crafted_sales_data,logs_dir+"\in_sampling_logs")
+    # train in-sampling model
+    train_in_sample(crafted_sales_data,logs_dir+"\in_sampling_logs")
 
-    # # train out-sampling model
-    # train_out_sample(crafted_sales_data,logs_dir+"\out_sampling_logs")
+    # train out-sampling model
+    train_out_sample(crafted_sales_data,logs_dir+"\out_sampling_logs")
 
-    # # extract and visualize train-in-sampling losses
-    # visualize_losses(logs_dir+"\in_sampling_logs","In Sampling")
+    # extract and visualize train-in-sampling losses
+    visualize_losses(logs_dir+"\in_sampling_logs","In Sampling")
 
-    # # extract and visualize train-out-sampling losses
-    # visualize_losses(logs_dir+"\out_sampling_logs", "Out Sampling")
+    # extract and visualize train-out-sampling losses
+    visualize_losses(logs_dir+"\out_sampling_logs", "Out Sampling")
 
-    # plt.show()
+    plt.show()
 
 
 main(file_path,forecast_feature,date_index)
