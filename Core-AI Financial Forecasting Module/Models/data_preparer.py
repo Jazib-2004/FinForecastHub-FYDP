@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 
+
 class DataPreparer:
     def __init__(self, file_path, forecast_feature, date_index):
         """
@@ -50,6 +51,7 @@ class DataPreparer:
             self.crafted_data.plot(title="Time Series Plot of Forecast Feature")
             plt.xlabel("Date")
             plt.ylabel(self.forecast_feature)
+            plt.save()
         else:
             print("No crafted data to plot. Please call 'craft_dataset()' first.")
 

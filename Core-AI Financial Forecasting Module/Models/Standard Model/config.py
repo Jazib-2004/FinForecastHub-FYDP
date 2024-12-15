@@ -4,3 +4,4 @@ file_path = r"C:\Users\HP\Desktop\7th Sem - Fall 2024\Deep Learning\Project\FinF
 forecast_feature = 'Bookings Margin'
 date_index = 'Date'
 logs_dir = "Results\Standard Model\\"
+plot_dir = "Results/Standard Model/plots"

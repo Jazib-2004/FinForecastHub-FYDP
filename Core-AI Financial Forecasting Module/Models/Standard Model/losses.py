@@ -1,6 +1,7 @@
 import os
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 import matplotlib.pyplot as plt
+from config import plot_dir
 
 def visualize_losses(logdir, train_type):
     event_acc = EventAccumulator(logdir)
@@ -28,3 +29,10 @@ def visualize_losses(logdir, train_type):
     plt.title(train_type+" Training and Validation Losses")
     plt.legend()
     plt.grid()
+
+    # save figure to .png file
+
+    plot_filename = os.path.join(plot_dir, train_type+" losses.png")
+    plt.savefig(plot_filename, dpi=300)
+    plt.close()
+    print("Plot saved successfuly")

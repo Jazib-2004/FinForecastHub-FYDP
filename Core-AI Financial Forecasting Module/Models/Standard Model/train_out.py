@@ -4,6 +4,7 @@ import shutil
 import matplotlib.pyplot as plt
 from sktime.forecasting.ttm import TinyTimeMixerForecaster
 from sktime.utils.plotting import plot_series
+from config import plot_dir
 
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
@@ -28,7 +29,7 @@ def train_model(data, logs_dir):
         "per_device_train_batch_size": 8,
         "report_to": "tensorboard",
         "learning_rate": 1e-4,
-		"max_steps": 700,
+		"max_steps": 500,
         "logging_dir": logs_dir,  # Logs directory
 		"eval_steps": 10,
 		"evaluation_strategy": "steps",
@@ -44,3 +45,9 @@ def train_model(data, logs_dir):
     y_pred = forecaster.predict()
     # Plotting out-of-sample predictions
     plot_series(data,y_pred)
+
+    # save fig to .png file
+    plot_filename = os.path.join(plot_dir, "out_sampling_forecasts.png")
+    plt.savefig(plot_filename, dpi=300)
+    plt.close()
+    print("Plot saved successfuly")
