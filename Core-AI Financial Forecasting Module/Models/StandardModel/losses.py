@@ -1,7 +1,7 @@
 import os
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 import matplotlib.pyplot as plt
-from config import plot_dir
+from StandardModel.config import plot_dir
 
 def visualize_losses(logdir, train_type):
     event_acc = EventAccumulator(logdir)

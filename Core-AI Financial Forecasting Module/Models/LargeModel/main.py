@@ -1,20 +1,26 @@
-import sys
 import os
 import pandas as pd
 # Add the parent directory to the system path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from fastapi import APIRouter, HTTPException
 from data_preparer import DataPreparer
-from train_in import train_model as train_in_sample
-from config import file_path,date_index,forecast_feature, logs_dir, plot_dir
-from train_out import train_model as train_out_sample
-from losses import visualize_losses
+from LargeModel.train_in import train_model as train_in_sample
+from LargeModel.config import file_path,date_index,forecast_feature, logs_dir, plot_dir
+from LargeModel.train_out import train_model as train_out_sample
+from LargeModel.losses import visualize_losses
 import matplotlib.pyplot as plt
+from fastapi import APIRouter
 
 
-def main(file_path,forecast_feature,date_index):
+largeRouter = APIRouter()
 
+
+@largeRouter.post('/train')
+async def main(file_path,forecast_feature,date_index):
+    # if os.path.exists(file_path):
+    #     return {"status": "File exists!", "file_path": file_path}
+    # else:
+    #     return {"status": "File not found!", "file_path": file_path}
     
     # Ensure the plots directory exists
     if not os.path.exists(plot_dir):
@@ -44,7 +50,9 @@ def main(file_path,forecast_feature,date_index):
     # extract and visualize train-out-sampling losses
     visualize_losses(logs_dir+"\out_sampling_logs", "Out Sampling")
 
-    plt.show()
+    return{
+        "status":"success",
+        "message":"model trained successfully"
+    }
 
 
-main(file_path,forecast_feature,date_index)

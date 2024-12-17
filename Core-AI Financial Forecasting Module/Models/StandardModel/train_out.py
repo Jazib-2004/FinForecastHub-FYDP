@@ -4,7 +4,7 @@ import shutil
 import matplotlib.pyplot as plt
 from sktime.forecasting.ttm import TinyTimeMixerForecaster
 from sktime.utils.plotting import plot_series
-from config import plot_dir
+from StandardModel.config import plot_dir
 
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
@@ -20,16 +20,16 @@ def train_model(data, logs_dir):
     # Initialize forecaster with required configurations
     forecaster = TinyTimeMixerForecaster(
     config={
-        "context_length": 64,
-        "prediction_length": 24,
+        "context_length": 32,
+        "prediction_length": 16,
     },
     training_args={
         # "num_train_epochs": 300,
         "output_dir": "test_output",
-        "per_device_train_batch_size": 64,
+        "per_device_train_batch_size": 8,
         "report_to": "tensorboard",
         "learning_rate": 1e-4,
-		"max_steps": 400,
+		"max_steps": 500,
         "logging_dir": logs_dir,  # Logs directory
 		"eval_steps": 10,
 		"evaluation_strategy": "steps",

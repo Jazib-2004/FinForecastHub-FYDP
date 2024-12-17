@@ -4,7 +4,7 @@ import shutil
 import matplotlib.pyplot as plt
 from sktime.forecasting.ttm import TinyTimeMixerForecaster
 from sktime.utils.plotting import plot_series
-from config import plot_dir
+from LargeModel.config import plot_dir
 
 def train_model(data, logs_dir):
     
