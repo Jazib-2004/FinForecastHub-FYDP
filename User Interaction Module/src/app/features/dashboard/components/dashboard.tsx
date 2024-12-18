@@ -9,8 +9,7 @@ import Featureselect from "./featureselect";
 import Resulttable from "./table";
 import Dashboardheader from "@/app/features/dashboard/components/dashboardheader";
 import Metadata from "./metadata";
-import { PieChart } from "lucide-react";
-import { Piechart } from "./piechart";
+import Preprocess from "../preprocess";
 import Charts from "./charts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -111,7 +110,7 @@ export default function Dashboard() {
                   Submit
                 </Button>
               </div>
-              <div className="mt-4">
+              <div className="mt-4 h-full">
                 <Addalert
                   showError={showError}
                   showSuccess={showSuccess}
@@ -119,7 +118,7 @@ export default function Dashboard() {
                 />
               </div>
               <div className="mt-4">
-                <Featureselect results={parsedResults} />
+                <Featureselect results={parsedResults} parsedresults={parsedResults} />
               </div>
             </CardContent>
           </form>

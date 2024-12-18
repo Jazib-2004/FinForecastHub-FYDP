@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException
 import pandas as pd
 from typing import Dict, Any
-from io import StringIO
 
 router = APIRouter()
 
 def is_date_column(col):
+    # Your existing date formats logic for identifying date columns
     date_formats = [
         '%Y-%m-%d',          # ISO 8601
         '%Y-%m-%dT%H:%M:%S', # ISO 8601 with time
@@ -41,24 +41,25 @@ def is_date_column(col):
     return False
 
 @router.post("/preprocess-dataset/")
-def preprocess_dataset(data: Dict[str, Any], selected_feature):
+def preprocess_dataset(data: Dict[str, Any]):
     """
     Preprocess the dataset for the selected feature.
 
     Args:
-        data (Dict): A dictionary containing the dataset and selected feature name.
+        data (Dict): A dictionary containing the parsed dataset and selected feature name.
 
     Returns:
         Dict: A response containing the preprocessed dataset and feature names.
     """
     try:
+        # Extract dataset and selected feature from the incoming request data
+    
+        # Extract dataset and selected feature from the incoming request data
+        dataset = pd.DataFrame(data['dataset'])  # Convert array of objects to DataFrame
+        print('got dataset')
 
-        # Simulate receiving the dataset from the validate_dataset API
-        # Dataset input simulation
-        # dataset = pd.read_csv(StringIO(dataset_csv))  # Simulated dataset
-
-        dataset = pd.read_csv('oldbookings-daywise.csv')
-
+        selected_feature = data.get('selected_feature')
+        print('got selected feature')
         # Step 1: Identify the date column using the `is_date_column` function
         date_column = None
         for col in dataset.columns:
@@ -69,27 +70,27 @@ def preprocess_dataset(data: Dict[str, Any], selected_feature):
         if not date_column:
             raise HTTPException(status_code=400, detail="No valid date column found in the dataset.")
 
-        # Step 2: Drop all columns except the date column and the selected feature
         if selected_feature not in dataset.columns:
             raise HTTPException(status_code=400, detail="Dataset must contain the selected feature.")
 
         dataset = dataset[[date_column, selected_feature]]
+        print(f"Processing columns: {date_column}, {selected_feature}")
 
-        # Step 3: Impute missing values in the date column and numeric column
+        # Step 2: Impute missing values in the date column and numeric column
         dataset[date_column] = pd.to_datetime(dataset[date_column], errors="coerce")
         dataset.dropna(subset=[date_column], inplace=True)  # Drop rows where the date is invalid
         dataset[selected_feature].fillna(dataset[selected_feature].median(), inplace=True)
 
-        # Step 4: Group by month and average the numeric column
-        dataset["monthly_date"] = dataset[date_column].dt.to_period("M")  # Convert to monthly period
+        # Step 3: Group by month and sum the selected feature
+        dataset["monthly_date"] = dataset[date_column].dt.to_period("M")
         monthly_data = dataset.groupby("monthly_date")[selected_feature].sum().reset_index()
 
-        # Step 5: Convert the month column back to a datetime format and sort
+        # Step 4: Convert the month column back to a datetime format and sort
         monthly_data["monthly_date"] = monthly_data["monthly_date"].dt.to_timestamp()
         monthly_data.set_index("monthly_date", inplace=True)
         monthly_data.sort_index(inplace=True)
 
-        # Step 6: Return the preprocessed dataset and feature names
+        # Step 5: Return the preprocessed dataset and feature names
         return {
             "status": "success",
             "preprocessed_data": monthly_data.to_dict(orient="index"),

@@ -8,15 +8,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ParseResult } from "papaparse";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Preprocess from "../preprocess";
 
 type FeatureselectProps = {
   results: ParseResult<any> | null;
   session_id?: string | null;
+  parsedresults: any | null;
 };
 
-const Featureselect: React.FC<FeatureselectProps> = ({ results }) => {
+const Featureselect: React.FC<FeatureselectProps> = ({
+  results,
+  parsedresults,
+}) => {
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+
+  // Effect to call Preprocess only when at least one checkbox is checked
+  useEffect(() => {
+    if (selectedColumns.length > 0) {
+      // Call Preprocess only when at least one column is selected
+      Preprocess(parsedresults, selectedColumns);
+    }
+  }, [selectedColumns, parsedresults]); // Re-run when selectedColumns or parsedresults change
 
   if (!results || !results.data || results.data.length === 0) {
     return <div>No data available to display columns.</div>;
