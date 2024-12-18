@@ -1,10 +1,15 @@
 from fastapi import APIRouter, UploadFile, HTTPException
+from numpy import outer
 import pandas as pd
 from io import BytesIO
 import uuid
 
 # In-memory storage for validated datasets
 validated_datasets = {}
+class CustomFileFormatException(HTTPException):
+    def __init__(self, detail: str):
+        # You need to call the parent class (HTTPException) constructor with status_code and detail
+        super().__init__(status_code=400, detail=detail)
 
 def is_date_column(col):
     date_formats = [
@@ -63,9 +68,9 @@ def calculate_year_span(df, date_column):
         raise HTTPException(status_code=400, detail=f"Year span calculation error: {str(e)}")
 
 router = APIRouter()
-
 @router.post("/validate-dataset/")
 def validate_dataset(file: UploadFile):
+    print(f"Received file: {file.filename}")
     try:
         # Step 1: Validate file format (can it be loaded into a Pandas DataFrame?)
         file_extension = file.filename.split(".")[-1].lower()
@@ -78,11 +83,12 @@ def validate_dataset(file: UploadFile):
         elif file_extension in ["json"]:
             df = pd.read_json(BytesIO(file.file.read()))
         else:
-            raise HTTPException(status_code=400, detail="Unsupported file format. Please upload a dataset only in CSV, Excel, JSON or Parquet formats.")
-
+            # Raise the custom exception instead of default HTTPException
+            raise CustomFileFormatException(detail="Unsupported file format. Please upload a dataset only in CSV, Excel, JSON or Parquet formats.")
+        
         # Step 2: Check if there are at least 2 columns
         if len(df.columns) < 2:
-            raise HTTPException(status_code=400, detail="Dataset must have at least 2 columns, a date column and a numeric column to forecast.")
+            raise CustomFileFormatException(detail="Dataset must have at least 2 columns, a date column and a numeric column to forecast.")
 
         # Step 3: Ensure there is a date column
         date_column = None
@@ -92,33 +98,28 @@ def validate_dataset(file: UploadFile):
                 break
 
         if not date_column:
-            raise HTTPException(status_code=400, detail="No date column found. Dataset is not time series.")
+            raise CustomFileFormatException(detail="No date column found. Dataset is not time series.")
 
         # Step 4: Ensure there is at least one numeric column to forecast
         numeric_columns = [col for col in df.columns if pd.api.types.is_numeric_dtype(df[col])]
         if not numeric_columns:
-            raise HTTPException(status_code=400, detail="No numeric column found for forecasting.")
+            raise CustomFileFormatException(detail="No numeric column found for forecasting.")
 
         # Step 5: Check the year span
         year_span = calculate_year_span(df, date_column)
         if year_span < 2:
-            raise HTTPException(status_code=400, detail="Insufficient data: Dataset must span at least 2 years.")
+            raise CustomFileFormatException(detail="Insufficient data: Dataset must span at least 2 years.")
         
         # Step 6: Return numeric columns only (excluding the date column)
         numeric_columns_without_date = [col for col in numeric_columns if col != date_column]
-
-        # Step 7: Generate a unique session ID and store the dataset
-        session_id = str(uuid.uuid4())
-        validated_datasets[session_id] = df
-
+        
         return {
             "status": "success",
-            "session_id": session_id,
-            "features": numeric_columns_without_date
+            "numeric_columns": numeric_columns_without_date
         }
 
-    except HTTPException as http_exc:
-        raise http_exc
+    except CustomFileFormatException as e:
+        raise e  # Now this will automatically propagate the detail from CustomFileFormatException
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")

@@ -12,6 +12,7 @@ import { useState } from "react";
 
 type FeatureselectProps = {
   results: ParseResult<any> | null;
+  session_id?: string | null;
 };
 
 const Featureselect: React.FC<FeatureselectProps> = ({ results }) => {
