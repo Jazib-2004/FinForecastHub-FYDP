@@ -9,7 +9,6 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 def train_model(data, logs_dir):
 
-    
     # Clean logs directory before starting a new training run
     if os.path.exists(logs_dir):
         shutil.rmtree(logs_dir) 
@@ -18,16 +17,16 @@ def train_model(data, logs_dir):
     # Initialize forecaster with required configurations
     forecaster = TinyTimeMixerForecaster(
     config={
-        "context_length": 32,
-        "prediction_length": 16,
+        "context_length": 16 ,
+        "prediction_length": 12,
     },
     training_args={
         # "num_train_epochs": 300,
         "output_dir": "test_output",
-        "per_device_train_batch_size": 8,
+        "per_device_train_batch_size": 4,
         "report_to": "tensorboard",
         "learning_rate": 1e-4,
-		"max_steps": 500,
+		"max_steps": 300,
         "logging_dir": logs_dir,  # Logs directory
 		"eval_steps": 10,
 		"evaluation_strategy": "steps",

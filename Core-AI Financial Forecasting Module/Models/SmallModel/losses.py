@@ -1,11 +1,13 @@
 import os
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 import matplotlib.pyplot as plt
-from StandardModel.config import plot_dir
+from LargeModel.config import plot_dir
 
 def visualize_losses(logdir, train_type):
     event_acc = EventAccumulator(logdir)
     event_acc.Reload()
+    # List all available scalar tags
+    print("Available tags:", event_acc.Tags()["scalars"])
 
     # Extract scalar summaries
     train_losses = event_acc.Scalars("train/loss") 

@@ -1,0 +1,34 @@
+Core-AI Based Financial Forecasting Module
+
+app port - 8001
+endpoint: http://127.0.0.1:8001
+
+1. Large Model Train API
+    endpoint: http://127.0.0.1:8001/large/train
+
+    takes: dataset path, forecast feature name, date index name.
+    returns: {
+        "status":"success",
+        "message":"model trained successfully",
+        "forecasts":forecasts.to_dict(orient="index")
+        }
+
+2. Standard Model Train API
+    endpoint: http://127.0.0.1:8001/standard/train
+
+    takes: dataset path, forecast feature name, date index name.
+    returns: {
+        "status":"success",
+        "message":"model trained successfully",
+        "forecasts":forecasts.to_dict(orient="index")
+        }
+
+3. Small Model Train API
+    endpoint: http://127.0.0.1:8001/small/train
+
+    takes: dataset path, forecast feature name, date index name.
+    returns: {
+        "status":"success",
+        "message":"model trained successfully",
+        "forecasts":forecasts.to_dict(orient="index")
+    }

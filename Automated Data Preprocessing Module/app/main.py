@@ -9,8 +9,8 @@ app = FastAPI(
 )
 
 # Include routers
-app.include_router(validate_dataset_router, prefix="/api/v1", tags=["Dataset Validation"])
-app.include_router(preprocess_data_router, prefix="/api/v1", tags=["Data Preprocessing"])
+app.include_router(validate_dataset_router, prefix="/validate", tags=["Dataset Validation"])
+app.include_router(preprocess_data_router, prefix="/preprocess", tags=["Data Preprocessing"])
 
 @app.get("/")
 def root():

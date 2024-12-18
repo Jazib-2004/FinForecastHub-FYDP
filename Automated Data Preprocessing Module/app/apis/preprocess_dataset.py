@@ -41,7 +41,7 @@ def is_date_column(col):
     return False
 
 @router.post("/preprocess-dataset/")
-def preprocess_dataset(data: Dict[str, Any]):
+def preprocess_dataset(data: Dict[str, Any], selected_feature):
     """
     Preprocess the dataset for the selected feature.
 
@@ -52,9 +52,6 @@ def preprocess_dataset(data: Dict[str, Any]):
         Dict: A response containing the preprocessed dataset and feature names.
     """
     try:
-        # Simulate receiving input from the front-end for the selected feature
-        # Front-end input simulation
-        selected_feature = 'Bookings Margin'  # Simulated input
 
         # Simulate receiving the dataset from the validate_dataset API
         # Dataset input simulation
@@ -96,7 +93,7 @@ def preprocess_dataset(data: Dict[str, Any]):
         return {
             "status": "success",
             "preprocessed_data": monthly_data.to_dict(orient="index"),
-            "feature_names": [selected_feature]
+            "feature_name": selected_feature
         }
 
     except Exception as e:

@@ -32,7 +32,7 @@ class DataPreparer:
         # Convert the date column to datetime
         try:
         # Attempt to parse the column to datetime
-            self.dataset[self.date_index] = pd.to_datetime(self.dataset[self.date_index], errors='coerce', infer_datetime_format=True)
+            self.dataset[self.date_index] = pd.to_datetime(self.dataset[self.date_index], format="%y-%b")
             print(f"Successfully converted column '{self.date_index}' to datetime.")
         except Exception as e:
             print(f"Error while converting column '{self.date_index}': {e}")
@@ -46,7 +46,7 @@ class DataPreparer:
         self.crafted_data = pd.DataFrame(dataset_scaled, columns=[self.forecast_feature], index=self.dataset.index)
 
         print("Data crafted successfully!")
-        return self.crafted_data
+        return {"scaler":scaler, "data":self.crafted_data}
 
     def plot_data(self):
         """

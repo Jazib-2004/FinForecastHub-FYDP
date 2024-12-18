@@ -1,0 +1,30 @@
+Automated Data Preprocessing Module APIs
+
+app port - 8000
+endpoint: http://127.0.0.1:8000
+
+1. Validate Dataset API
+    endpoint: http://127.0.0.1:8000/validate/validate-dataset
+
+    takes: file (from Uplaod File)
+    returns: {
+            "status": "success",
+            "session_id": session_id,
+            "features": numeric_columns_without_date
+        }
+
+2. Preprocess Dataset API
+    endpoint: http://127.0.0.1:8000/preprocess/preprocess-dataset
+
+    takes: data: Dict[str, Any], selected_feature
+    returns:    {
+            "status": "success",
+            "preprocessed_data": monthly_data.to_dict(orient="index"),
+            "feature_name": selected_feature
+        }
+
+
+
+
+
+
