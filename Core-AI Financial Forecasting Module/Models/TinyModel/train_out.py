@@ -17,15 +17,15 @@ def train_model(data, logs_dir):
     # Initialize forecaster with required configurations
     forecaster = TinyTimeMixerForecaster(
     config={
-        "context_length": 12 ,
-        "prediction_length": 12,
+        "context_length": 6 ,
+        "prediction_length": 6,
     },
     training_args={
         # "num_train_epochs": 300,
         "output_dir": "test_output",
         "per_device_train_batch_size": 2,
         "report_to": "tensorboard",
-        "learning_rate": 1e-4,
+        "learning_rate": 5e-4,
 		"max_steps": 300,
         "logging_dir": logs_dir,  # Logs directory
 		"eval_steps": 10,

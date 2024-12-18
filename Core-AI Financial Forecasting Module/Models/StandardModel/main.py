@@ -3,7 +3,7 @@ import pandas as pd
 import json
 from data_preparer import DataPreparer
 from StandardModel.train_in import train_model as train_in_sample
-from StandardModel.config import file_path,date_index,forecast_feature, logs_dir, plot_dir
+from StandardModel.config import logs_dir, plot_dir
 from StandardModel.train_out import train_model as train_out_sample
 from StandardModel.losses import visualize_losses
 import matplotlib.pyplot as plt

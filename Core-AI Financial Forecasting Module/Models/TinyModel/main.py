@@ -1,20 +1,28 @@
 import os
 import pandas as pd
-from data_preparer import DataPreparer
+import json
 from TinyModel.train_in import train_model as train_in_sample
-from TinyModel.config import file_path,date_index,forecast_feature, logs_dir, plot_dir
+from TinyModel.config import logs_dir, plot_dir
 from TinyModel.train_out import train_model as train_out_sample
 from TinyModel.losses import visualize_losses
 import matplotlib.pyplot as plt
 from fastapi import APIRouter
 from sktime.utils.plotting import plot_series
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 
-smallRouter = APIRouter()
+tinyRouter = APIRouter()
 
-@smallRouter.post('/train')
-async def main(file_path,forecast_feature,date_index):
+@tinyRouter.post('/train')
+async def main(processed_data):
 
+    processed_data = json.loads(processed_data)
+    processed_data = pd.DataFrame.from_dict(processed_data, orient="index")
+    processed_data.index = pd.to_datetime(processed_data.index)
+    print(processed_data.head())
+
+    # scale dataset
+    scaler = MinMaxScaler()
+    scaled_data = scaler.fit_transform(processed_data)
     # Ensure the plots directory exists
     if not os.path.exists(plot_dir):
         print(f"Creating directory: {plot_dir}")
@@ -22,23 +30,11 @@ async def main(file_path,forecast_feature,date_index):
     else:
         print(f"Directory already exists: {plot_dir}")
     
-    # prepare data
-    data_preparer = DataPreparer(file_path, forecast_feature, date_index)
-
-    data_preparer.load_data()
-    data_crafter = data_preparer.craft_dataset()
-    scaler = data_crafter['scaler']
-    crafted_sales_data = data_crafter['data']
-
-    # data_preparer.plot_data()
-    data_preparer.sort_dataset()
-    crafted_sales_data = data_preparer.get_crafted_data()
-
     # train in-sampling model
-    train_in_sample(crafted_sales_data,logs_dir+"\in_sampling_logs")
+    train_in_sample(scaled_data,logs_dir+"\in_sampling_logs")
 
     # train out-sampling model
-    trained_model = train_out_sample(crafted_sales_data,logs_dir+"\out_sampling_logs")
+    trained_model = train_out_sample(scaled_data,logs_dir+"\out_sampling_logs")
     data_scaled = trained_model['data']
     forecasts_scaled = trained_model['forecasts']
 
