@@ -38,7 +38,7 @@ def is_date_column(col):
         except (ValueError, TypeError):
             continue
 
-    return False
+    return False 
 
 @router.post("/preprocess-dataset/")
 def preprocess_dataset(data: Dict[str, Any]):
@@ -52,50 +52,69 @@ def preprocess_dataset(data: Dict[str, Any]):
         Dict: A response containing the preprocessed dataset and feature names.
     """
     try:
-        # Extract dataset and selected feature from the incoming request data
-    
-        # Extract dataset and selected feature from the incoming request data
-        dataset = pd.DataFrame(data['dataset'])  # Convert array of objects to DataFrame
-        print('got dataset')
+        # Extract dataset and selected feature
+        raw_data = data['dataset']
+        selected_feature = data['selected_feature']
 
-        selected_feature = data.get('selected_feature')
-        print('got selected feature')
-        # Step 1: Identify the date column using the `is_date_column` function
+        # Use the first row as column names
+        column_names = raw_data[1]
+        dataset = pd.DataFrame(raw_data[2:], columns=column_names)
+
+        # Ensure the selected feature exists
+        if selected_feature not in dataset.columns:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Selected feature '{selected_feature}' not found in dataset."
+            )
+
+        # Step 1: Identify the date column
         date_column = None
         for col in dataset.columns:
-            if is_date_column(dataset[col]):
-                date_column = col
-                break
+            try:
+                if is_date_column(dataset[col]):
+                    date_column = col
+                    break
+            except Exception:
+                continue
 
         if not date_column:
-            raise HTTPException(status_code=400, detail="No valid date column found in the dataset.")
+            raise HTTPException(
+                status_code=400, 
+                detail="No valid date column found in the dataset."
+            )
 
-        if selected_feature not in dataset.columns:
-            raise HTTPException(status_code=400, detail="Dataset must contain the selected feature.")
-
+        # Step 2: Keep only the date column and selected feature
         dataset = dataset[[date_column, selected_feature]]
-        print(f"Processing columns: {date_column}, {selected_feature}")
 
-        # Step 2: Impute missing values in the date column and numeric column
+        # Step 3: Handle missing values and parse dates
         dataset[date_column] = pd.to_datetime(dataset[date_column], errors="coerce")
-        dataset.dropna(subset=[date_column], inplace=True)  # Drop rows where the date is invalid
+        dataset.dropna(subset=[date_column], inplace=True)
+        dataset[selected_feature] = pd.to_numeric(dataset[selected_feature], errors="coerce")
         dataset[selected_feature].fillna(dataset[selected_feature].median(), inplace=True)
 
-        # Step 3: Group by month and sum the selected feature
+        # Step 4: Group by month and sum the selected feature
         dataset["monthly_date"] = dataset[date_column].dt.to_period("M")
         monthly_data = dataset.groupby("monthly_date")[selected_feature].sum().reset_index()
 
-        # Step 4: Convert the month column back to a datetime format and sort
+        # Step 5: Convert the month column back to a datetime format and sort
         monthly_data["monthly_date"] = monthly_data["monthly_date"].dt.to_timestamp()
         monthly_data.set_index("monthly_date", inplace=True)
         monthly_data.sort_index(inplace=True)
+        print(monthly_data)
 
-        # Step 5: Return the preprocessed dataset and feature names
         return {
             "status": "success",
             "preprocessed_data": monthly_data.to_dict(orient="index"),
             "feature_name": selected_feature
         }
 
+    except KeyError as e:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Missing expected key in input data: {str(e)}"
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred during preprocessing: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"An error occurred during preprocessing: {str(e)}"
+        )

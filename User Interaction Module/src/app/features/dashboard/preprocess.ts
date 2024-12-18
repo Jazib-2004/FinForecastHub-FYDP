@@ -1,50 +1,40 @@
-export default function Preprocess(
-  parsedData: any,
-  selectedColumns: string[]
-): void {// Assuming `columnNames` is an array of column names
-    const formattedDataset = parsedData.data.map((row: string[]) => {
-        let rowObject: { [key: string]: any } = {};  // Define rowObject as an object with string keys and any values
-      
-        // Assuming columnNames is already defined properly
-        
-      
-        row.forEach((value: any, index: number) => {  // Define value and index types explicitly
-          rowObject[selectedColumns[index]] = value;  // Indexing into rowObject using columnNames
-        });
-      
-        return rowObject;
-      });
-      
-    
-    // Now, sending the data as an array of objects:
-    console.log("Sending formatted JSON data:", {
-      dataset: formattedDataset,  // Array of objects instead of arrays
-      selected_feature: selectedColumns[0],
+export default function Preprocess(parsedData: any, selectedColumns: string[]): void {
+    // Extract headers (assuming the dataset is in a tabular format with data and headers)
+    const headers = Object.keys(parsedData.data[0]); // Get column names from the first object
+    const formattedDataset = [
+      headers, // Add headers as the first row
+      ...parsedData.data.map((row: any) => headers.map((key: string) => row[key])), // Map each row to an array of values
+    ];
+  
+    console.log("Sending JSON data:", {
+      dataset: formattedDataset, // Pass the formatted dataset
+      selected_feature: selectedColumns[0], // Take the first feature as the selected one
     });
-    
-    fetch("http://localhost:8000/preprocess/preprocess_dataset/", {
+  
+    // Sending formatted data to the backend
+    fetch("http://localhost:8000/preprocess/preprocess-dataset/", {
       method: "POST",
-      body: JSON.stringify({
-        dataset: formattedDataset,  // Send as an array of objects
-        selected_feature: selectedColumns[0], 
-      }),
       headers: {
-        "Content-Type": "application/json",
-      }
+        "Content-Type": "application/json", // Content-type for sending JSON data
+      },
+      body: JSON.stringify({
+        dataset: formattedDataset, // Pass the formatted dataset
+        selected_feature: selectedColumns[0], // Take the first feature as the selected one
+      }),
     })
       .then((response) => {
         if (!response.ok) {
           return response.json().then((errorData) => {
-            throw new Error(errorData.detail || "Failed to upload dataset.");
+            throw new Error(errorData.detail || "Failed to preprocess dataset.");
           });
         }
-        return response.json();
+        return response.json(); // Parse JSON if response is OK
       })
       .then((data) => {
-        console.log(data);
+        console.log(data); // Handle the response data here if needed
       })
       .catch((error) => {
         console.error("Error uploading file:", error);
       });
-    }
-    
+  }
+  
