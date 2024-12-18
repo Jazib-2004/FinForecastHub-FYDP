@@ -2,7 +2,6 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 
-
 class DataPreparer:
     def __init__(self, file_path, forecast_feature, date_index):
         """

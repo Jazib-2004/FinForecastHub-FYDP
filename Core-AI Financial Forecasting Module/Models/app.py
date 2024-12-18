@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from LargeModel.main import largeRouter
 from StandardModel.main import standardRouter
+from TinyModel.main import smallRouter
 
 app = FastAPI(
     title="Core-AI Based Financial Forecasting Module",
@@ -11,6 +12,7 @@ app = FastAPI(
 # Include routers
 app.include_router(largeRouter, prefix="/large", tags=["Train Large Model"])
 app.include_router(standardRouter, prefix="/standard", tags=["Train Standard Model"])
+app.include_router(smallRouter,prefix="/small",tags=["Train Small Model"])
 
 @app.get("/")
 def root():

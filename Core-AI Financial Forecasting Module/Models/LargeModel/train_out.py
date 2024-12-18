@@ -43,6 +43,12 @@ def train_model(data, logs_dir):
     # Fit the model on the entire dataset
     forecaster.fit(data, fh=list(range(1, 1 + horizon_len)))
     y_pred = forecaster.predict()
+
+    return {
+        "forecasts":y_pred,
+        "data":data
+    }
+
     # Plotting out-of-sample predictions
     plot_series(data,y_pred)
 
