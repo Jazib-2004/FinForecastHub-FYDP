@@ -17,6 +17,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
   { month: "February", desktop: 305, mobile: 200 },
@@ -39,7 +40,7 @@ const chartConfig = {
 
 export function Areachart() {
   return (
-    <Card className="h-[408px]">
+    <Card className="w-full sm:w-[300px] lg:w-[600px] mx-auto h-auto sm:h-[408px]">
       <CardHeader>
         <CardTitle>Area Chart - Stacked</CardTitle>
         <CardDescription>
@@ -91,10 +92,10 @@ export function Areachart() {
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-2">
             <div className="flex items-center gap-2 font-medium leading-none">
-           
+              {/* Any footer content */}
             </div>
             <div className="flex items-center gap-2 leading-none text-muted-foreground">
-              
+              {/* Any additional footer content */}
             </div>
           </div>
         </div>

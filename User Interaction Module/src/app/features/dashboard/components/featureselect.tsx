@@ -34,7 +34,11 @@ const Featureselect: React.FC<FeatureselectProps> = ({
   }, [selectedColumn, parsedresults]);
 
   if (!results || !results.data || results.data.length === 0) {
-    return <div>No data available to display columns.</div>;
+    return (
+      <div className="text-center text-sm text-gray-500">
+        No data available to display columns.
+      </div>
+    );
   }
 
   const columnNames = results.data[0];
@@ -44,20 +48,26 @@ const Featureselect: React.FC<FeatureselectProps> = ({
       <DropdownMenuTrigger asChild>
         <Button
           variant="default"
-          className="mb-4 hover:text-white transition-colors duration-200"
+          className="mb-4 w-full md:w-auto hover:text-white transition-colors duration-200"
         >
           Select a Feature
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="py-2 px-4 rounded-lg shadow-lg bg-white w-56">
-        <DropdownMenuLabel>Choose a Feature</DropdownMenuLabel>
+      <DropdownMenuContent className="py-2 px-4 rounded-lg shadow-lg bg-white w-full md:w-56">
+        <DropdownMenuLabel className="text-center font-semibold text-gray-700">
+          Choose a Feature
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuRadioGroup
           value={selectedColumn || ""}
           onValueChange={(value) => setSelectedColumn(value)}
         >
           {columnNames.map((column: string, index: number) => (
-            <DropdownMenuRadioItem key={index} value={column}>
+            <DropdownMenuRadioItem
+              key={index}
+              value={column}
+              className="py-2 hover:bg-gray-100"
+            >
               {column}
             </DropdownMenuRadioItem>
           ))}
