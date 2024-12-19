@@ -10,12 +10,13 @@ import matplotlib.pyplot as plt
 from fastapi import APIRouter
 from sktime.utils.plotting import plot_series
 from sklearn.preprocessing import MinMaxScaler
+from typing import Dict, Any
 
 largeRouter = APIRouter()
 
 
 @largeRouter.post('/train')
-async def main(processed_data):
+async def main(processed_data:Dict[str, Any]):
 
     processed_data = json.loads(processed_data)
     processed_data = pd.DataFrame.from_dict(processed_data, orient="index")
@@ -55,7 +56,7 @@ async def main(processed_data):
     plt.savefig(plot_filename, dpi=300)
     plt.close()
     print("Plot saved successfuly")
-    
+
     # extract and visualize train-in-sampling losses
     visualize_losses(logs_dir+"\in_sampling_logs","In Sampling")
 
