@@ -92,8 +92,10 @@ export default function Dashboard() {
       <Dashboardheader />
 
       <Metadata />
+      <Charts />
       <div className="flex flex-row w-full space-x-4">
-        <Card>
+
+        <Card className="h-[250px]">
           <form onSubmit={handleSubmit} className="w-full max-w-md">
             <CardHeader>
               <CardTitle>Upload Your Dataset Below</CardTitle>
@@ -124,12 +126,13 @@ export default function Dashboard() {
           </form>
         </Card>
         {parsedResults && (
-          <div className="w-2/3 max-w-4xl space-y-6">
+          <div className="w-2/3 max-w-4xl space-y-6 h-full">
             <Resulttable results={parsedResults} />
           </div>
         )}
+      
       </div>
-      <Charts />
+   
     </div>
   );
 }
