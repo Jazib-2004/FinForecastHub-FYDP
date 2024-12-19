@@ -10,14 +10,27 @@ import matplotlib.pyplot as plt
 from fastapi import APIRouter
 from sktime.utils.plotting import plot_series
 from sklearn.preprocessing import MinMaxScaler
+from typing import Dict, Any
 
 largeRouter = APIRouter()
 
 
 @largeRouter.post('/train')
-async def main(processed_data):
-
-    processed_data = json.loads(processed_data)
+async def main(processed_data:Dict[str, Any]):
+    print(type(processed_data))
+    if isinstance(processed_data, str):
+    # Only use json.loads if the input is a JSON-formatted string
+        try:
+            processed_data = json.loads(processed_data)
+    
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON string provided: {e}")
+    
+    elif isinstance(processed_data, dict):
+        pass
+    else:
+        raise ValueError(f"Unexpected input type for processed_data: {type(processed_data)}")
+    
     processed_data = pd.DataFrame.from_dict(processed_data, orient="index")
     processed_data.index = pd.to_datetime(processed_data.index)
     print(processed_data.head())
@@ -67,5 +80,3 @@ async def main(processed_data):
         "message":"model trained successfully",
         "forecasts":forecasts.to_dict(orient="index")
     }
-
-
