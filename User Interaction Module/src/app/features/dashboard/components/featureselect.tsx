@@ -52,7 +52,7 @@ const Featureselect: React.FC<FeatureselectProps> = ({
           variant="default"
           className="mb-4 hover:text-white transition-colors duration-200"
         >
-          Choose your parameters
+          Select a Feature
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="py-2 px-4 rounded-lg shadow-lg bg-white">

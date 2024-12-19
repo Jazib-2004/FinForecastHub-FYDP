@@ -1,40 +1,50 @@
+import training from "./training";
+
+interface Result {
+  status: string;
+  preprocessed_data: Record<string, { [key: string]: any }>;
+  feature_name: string;
+}
+
 export default function Preprocess(parsedData: any, selectedColumns: string[]): void {
-    // Extract headers (assuming the dataset is in a tabular format with data and headers)
-    const headers = Object.keys(parsedData.data[0]); // Get column names from the first object
-    const formattedDataset = [
-      headers, // Add headers as the first row
-      ...parsedData.data.map((row: any) => headers.map((key: string) => row[key])), // Map each row to an array of values
-    ];
-  
-    console.log("Sending JSON data:", {
-      dataset: formattedDataset, // Pass the formatted dataset
-      selected_feature: selectedColumns[0], // Take the first feature as the selected one
-    });
-  
-    // Sending formatted data to the backend
-    fetch("http://localhost:8000/preprocess/preprocess-dataset/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json", // Content-type for sending JSON data
-      },
-      body: JSON.stringify({
-        dataset: formattedDataset, // Pass the formatted dataset
-        selected_feature: selectedColumns[0], // Take the first feature as the selected one
-      }),
+  const headers = Object.keys(parsedData.data[0]);
+  const formattedDataset = [
+    headers,
+    ...parsedData.data.map((row: any) => headers.map((key: string) => row[key])),
+  ];
+
+  console.log("Sending JSON data:", {
+    dataset: formattedDataset,
+    selected_feature: selectedColumns[0],
+  });
+
+  fetch("http://localhost:8000/preprocess/preprocess-dataset/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      dataset: formattedDataset,
+      selected_feature: selectedColumns[0],
+    }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        return response.json().then((errorData) => {
+          throw new Error(errorData.detail || "Failed to preprocess dataset.");
+        });
+      }
+      return response.json(); // Parse JSON if response is OK
     })
-      .then((response) => {
-        if (!response.ok) {
-          return response.json().then((errorData) => {
-            throw new Error(errorData.detail || "Failed to preprocess dataset.");
-          });
-        }
-        return response.json(); // Parse JSON if response is OK
-      })
-      .then((data) => {
-        console.log(data); // Handle the response data here if needed
-      })
-      .catch((error) => {
-        console.error("Error uploading file:", error);
-      });
-  }
-  
+    .then((data: Result) => {
+      console.log(`Status: ${data.status}`);
+      console.log(`Feature: ${data.feature_name}`);
+      console.log(`Preprocessed Data:`, data.preprocessed_data);
+
+      // Call training with the correct arguments
+      training(data.preprocessed_data, data.feature_name);
+    })
+    .catch((error) => {
+      console.error("Error during preprocessing:", error);
+    });
+}
