@@ -17,8 +17,19 @@ largeRouter = APIRouter()
 
 @largeRouter.post('/train')
 async def main(processed_data:Dict[str, Any]):
+    if isinstance(processed_data, str):
+    # Only use json.loads if the input is a JSON-formatted string
+        try:
+            processed_data = json.loads(processed_data)
+    
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON string provided: {e}")
+    
+    elif isinstance(processed_data, dict):
+        pass
+    else:
+        raise ValueError(f"Unexpected input type for processed_data: {type(processed_data)}")
 
-    processed_data = json.loads(processed_data)
     processed_data = pd.DataFrame.from_dict(processed_data, orient="index")
     processed_data.index = pd.to_datetime(processed_data.index)
     print(processed_data.head())
