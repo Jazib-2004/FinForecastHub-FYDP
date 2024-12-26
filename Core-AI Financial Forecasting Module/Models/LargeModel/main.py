@@ -10,14 +10,16 @@ import matplotlib.pyplot as plt
 from fastapi import APIRouter
 from sktime.utils.plotting import plot_series
 from sklearn.preprocessing import MinMaxScaler
+from typing import Dict, Any
 
 largeRouter = APIRouter()
 
 
 @largeRouter.post('/train')
-async def main(processed_data):
+async def main(processed_data: Dict[str, Any]):
+    print("Processed Data:",processed_data)
 
-    processed_data = json.loads(processed_data)
+    # processed_data = json.loads(processed_data)
     processed_data = pd.DataFrame.from_dict(processed_data, orient="index")
     processed_data.index = pd.to_datetime(processed_data.index)
     print(processed_data.head())
@@ -25,7 +27,8 @@ async def main(processed_data):
     # scale dataset
     scaler = MinMaxScaler()
     scaled_data = scaler.fit_transform(processed_data)
-    
+    scaled_data = pd.DataFrame(scaled_data, columns=processed_data.columns,index=processed_data.index)
+
     if not os.path.exists(plot_dir):
         print(f"Creating directory: {plot_dir}")
         os.makedirs(plot_dir, exist_ok=True)
@@ -33,7 +36,7 @@ async def main(processed_data):
         print(f"Directory already exists: {plot_dir}")
 
     # train in-sampling model
-    train_in_sample(scaled_data,logs_dir+"\in_sampling_logs")
+    # train_in_sample(scaled_data,logs_dir+"\in_sampling_logs")
 
     # train out-sampling model
     trained_model = train_out_sample(scaled_data,logs_dir+"\out_sampling_logs")
@@ -57,7 +60,7 @@ async def main(processed_data):
     print("Plot saved successfuly")
     
     # extract and visualize train-in-sampling losses
-    visualize_losses(logs_dir+"\in_sampling_logs","In Sampling")
+    # visualize_losses(logs_dir+"\in_sampling_logs","In Sampling")
 
     # extract and visualize train-out-sampling losses
     visualize_losses(logs_dir+"\out_sampling_logs", "Out Sampling")

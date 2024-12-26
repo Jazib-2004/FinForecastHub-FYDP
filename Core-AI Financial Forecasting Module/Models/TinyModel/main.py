@@ -15,19 +15,6 @@ tinyRouter = APIRouter()
 @tinyRouter.post('/train')
 async def main(processed_data:Dict[str, Any]):
 
-    if isinstance(processed_data, str):
-    # Only use json.loads if the input is a JSON-formatted string
-        try:
-            processed_data = json.loads(processed_data)
-    
-        except json.JSONDecodeError as e:
-            raise ValueError(f"Invalid JSON string provided: {e}")
-    
-    elif isinstance(processed_data, dict):
-        pass
-    else:
-        raise ValueError(f"Unexpected input type for processed_data: {type(processed_data)}")
-
     processed_data = pd.DataFrame.from_dict(processed_data, orient="index")
     processed_data.index = pd.to_datetime(processed_data.index)
     print(processed_data.head())
@@ -35,6 +22,8 @@ async def main(processed_data:Dict[str, Any]):
     # scale dataset
     scaler = MinMaxScaler()
     scaled_data = scaler.fit_transform(processed_data)
+    scaled_data = pd.DataFrame(scaled_data, columns = processed_data.columns, index = processed_data.index)
+    
     # Ensure the plots directory exists
     if not os.path.exists(plot_dir):
         print(f"Creating directory: {plot_dir}")
@@ -43,7 +32,7 @@ async def main(processed_data:Dict[str, Any]):
         print(f"Directory already exists: {plot_dir}")
     
     # train in-sampling model
-    train_in_sample(scaled_data,logs_dir+"\in_sampling_logs")
+    # train_in_sample(scaled_data,logs_dir+"\in_sampling_logs")
 
     # train out-sampling model
     trained_model = train_out_sample(scaled_data,logs_dir+"\out_sampling_logs")
@@ -67,7 +56,7 @@ async def main(processed_data:Dict[str, Any]):
     
 
     # extract and visualize train-in-sampling losses
-    visualize_losses(logs_dir+"\in_sampling_logs","In Sampling")
+    # visualize_losses(logs_dir+"\in_sampling_logs","In Sampling")
 
     # extract and visualize train-out-sampling losses
     visualize_losses(logs_dir+"\out_sampling_logs", "Out Sampling")
@@ -75,4 +64,5 @@ async def main(processed_data:Dict[str, Any]):
     return {
         "status":"success",
         "message":"model trained successfully",
-        "forecasts":forecasts.to_dict(orient="index")}
+        "forecasts":forecasts.to_dict(orient="index")
+    }

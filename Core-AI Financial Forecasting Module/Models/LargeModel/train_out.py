@@ -11,7 +11,6 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 def train_model(data, logs_dir):
 
-    
     # Clean logs directory before starting a new training run
     if os.path.exists(logs_dir):
         shutil.rmtree(logs_dir) 
