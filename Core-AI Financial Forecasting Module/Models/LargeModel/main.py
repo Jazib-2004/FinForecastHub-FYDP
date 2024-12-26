@@ -17,7 +17,6 @@ largeRouter = APIRouter()
 
 @largeRouter.post('/train')
 async def main(processed_data: Dict[str, Any]):
-    print("Processed Data:",processed_data)
 
     # processed_data = json.loads(processed_data)
     processed_data = pd.DataFrame.from_dict(processed_data, orient="index")
@@ -70,5 +69,3 @@ async def main(processed_data: Dict[str, Any]):
         "message":"model trained successfully",
         "forecasts":forecasts.to_dict(orient="index")
     }
-
-

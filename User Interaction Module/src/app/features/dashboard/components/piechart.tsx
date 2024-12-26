@@ -18,9 +18,10 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+
 const chartData = [
   { month: "January", sales: 275, fill: "var(--color-chrome)" },
-  { month: "Febuary", sales: 200, fill: "var(--color-safari)" },
+  { month: "February", sales: 200, fill: "var(--color-safari)" },
   { month: "March", sales: 287, fill: "var(--color-firefox)" },
   { month: "April", sales: 173, fill: "var(--color-edge)" },
   { month: "May", sales: 190, fill: "var(--color-other)" },
@@ -35,7 +36,7 @@ const chartConfig = {
     color: "hsl(var(--chart-1))",
   },
   safari: {
-    label: "Febuary",
+    label: "February",
     color: "hsl(var(--chart-2))",
   },
   firefox: {
@@ -58,7 +59,7 @@ export function Piechart() {
   }, [])
 
   return (
-    <Card className="flex flex-col h-[408px]">
+    <Card className="w-full sm:w-[500px] lg:w-[600px] mx-auto flex flex-col h-auto sm:h-[408px]">
       <CardHeader className="items-center pb-0">
         <CardTitle>Analytics | Top 6 Profitable Months</CardTitle>
         <CardDescription>January - December 2024</CardDescription>
@@ -66,7 +67,7 @@ export function Piechart() {
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
+          className="mx-auto aspect-square max-h-[250px] w-full"
         >
           <PieChart>
             <ChartTooltip

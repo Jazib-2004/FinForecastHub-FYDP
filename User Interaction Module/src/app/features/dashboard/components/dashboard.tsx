@@ -9,7 +9,6 @@ import Featureselect from "./featureselect";
 import Resulttable from "./table";
 import Dashboardheader from "@/app/features/dashboard/components/dashboardheader";
 import Metadata from "./metadata";
-import Preprocess from "../preprocess";
 import Charts from "./charts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -25,7 +24,7 @@ export default function Dashboard() {
     const file = e.target.files?.[0] || null;
     setDataset(file);
     setShowError(false);
-    setErrorMessage(""); // Clear any previous error messages
+    setErrorMessage("");
   };
 
   const handleSubmit = (e: FormEvent) => {
@@ -36,12 +35,9 @@ export default function Dashboard() {
         complete: function (results) {
           setParsedResults(results);
 
-          // Create a Blob object from the parsed CSV data
-          // Create FormData to send the file to the server
           const formData = new FormData();
           formData.append("file", dataset, dataset.name);
 
-          // Send the file to the backend
           fetch("http://localhost:8000/validate/validate-dataset/", {
             method: "POST",
             body: formData,
@@ -54,7 +50,7 @@ export default function Dashboard() {
                   );
                 });
               }
-              return response.json(); // Parse JSON if response is OK
+              return response.json();
             })
             .then((data) => {
               if (data.status === "success") {
@@ -68,11 +64,7 @@ export default function Dashboard() {
             })
             .catch((error) => {
               console.error("Error uploading file:", error);
-
-              // Display the error message from the backend
-              setErrorMessage(error.message); // Use the message from the error object
-
-             
+              setErrorMessage(error.message);
 
               setShowError(true);
               setShowSuccess(false);
@@ -88,29 +80,29 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex flex-col items-center w-full px-4 py-6 space-y-6 bg-neutral-300 h-full">
+    <div className="flex flex-col items-center w-full px-4 py-6 space-y-6 bg-neutral-300 min-h-screen">
       <Dashboardheader />
-
       <Metadata />
-      <div className="flex flex-row w-full space-x-4">
-        <Card>
-          <form onSubmit={handleSubmit} className="w-full max-w-md">
+      <Charts />
+      <div className="flex flex-col lg:flex-row w-full space-y-4 lg:space-y-0 lg:space-x-4">
+        <Card className="lg:w-1/3 w-full">
+          <form onSubmit={handleSubmit} className="w-full">
             <CardHeader>
               <CardTitle>Upload Your Dataset Below</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center space-x-4">
+              <div className="flex flex-col space-y-4">
                 <Input
                   type="file"
                   onChange={handleFileChange}
                   accept=".csv,.xlsx,.json"
-                  className="flex-1"
+                  className="w-full"
                 />
-                <Button type="submit" className="flex-shrink-0">
+                <Button type="submit" className="w-full">
                   Submit
                 </Button>
               </div>
-              <div className="mt-4 h-full">
+              <div className="mt-4">
                 <Addalert
                   showError={showError}
                   showSuccess={showSuccess}
@@ -118,18 +110,20 @@ export default function Dashboard() {
                 />
               </div>
               <div className="mt-4">
-                <Featureselect results={parsedResults} parsedresults={parsedResults} />
+                <Featureselect
+                  results={parsedResults}
+                  parsedresults={parsedResults}
+                />
               </div>
             </CardContent>
           </form>
         </Card>
         {parsedResults && (
-          <div className="w-2/3 max-w-4xl space-y-6">
+          <div className="lg:w-2/3 w-full space-y-6">
             <Resulttable results={parsedResults} />
           </div>
         )}
       </div>
-      <Charts />
     </div>
   );
 }

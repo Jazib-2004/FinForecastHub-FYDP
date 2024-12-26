@@ -5,9 +5,10 @@ from LargeModel.main import largeRouter
 from StandardModel.main import standardRouter
 from TinyModel.main import tinyRouter
 
+# Create the FastAPI app
 app = FastAPI(
     title="Core-AI Based Financial Forecasting Module",
-    description="An API system for model training and evaluation of time-serires financial datasets",
+    description="An API system for model training and evaluation of time-series financial datasets",
     version="1.0.0"
 )
 
@@ -30,11 +31,10 @@ app.add_middleware(
 # Include routers
 app.include_router(largeRouter, prefix="/large", tags=["Train Large Model"])
 app.include_router(standardRouter, prefix="/standard", tags=["Train Standard Model"])
-app.include_router(tinyRouter,prefix="/tiny",tags=["Train Tiny Model"])
+app.include_router(tinyRouter, prefix="/tiny", tags=["Train Tiny Model"])
 
 
 
 @app.get("/")
 def root():
     return {"message": "Welcome to FinForecastHub's (Core-AI Based Financial Forecaster) Module"}
-

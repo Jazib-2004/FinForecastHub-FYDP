@@ -1,11 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { ParseResult } from "papaparse";
 import { useState, useEffect } from "react";
@@ -21,64 +24,54 @@ const Featureselect: React.FC<FeatureselectProps> = ({
   results,
   parsedresults,
 }) => {
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
 
-  // Effect to call Preprocess only when at least one checkbox is checked
+  // Effect to call Preprocess only when a column is selected
   useEffect(() => {
-    if (selectedColumns.length > 0) {
-      // Call Preprocess only when at least one column is selected
-      Preprocess(parsedresults, selectedColumns);
+    if (selectedColumn) {
+      Preprocess(parsedresults, [selectedColumn]); // Pass selected column as an array
     }
-  }, [selectedColumns, parsedresults]); // Re-run when selectedColumns or parsedresults change
+  }, [selectedColumn, parsedresults]);
 
   if (!results || !results.data || results.data.length === 0) {
-    return <div>No data available to display columns.</div>;
+    return (
+      <div className="text-center text-sm text-gray-500">
+        No data available to display columns.
+      </div>
+    );
   }
 
   const columnNames = results.data[0];
-
-  const handleCheckboxChange = (columnName: string, isChecked: boolean) => {
-    if (isChecked) {
-      setSelectedColumns((prev) => [...prev, columnName]);
-    } else {
-      setSelectedColumns((prev) => prev.filter((col) => col !== columnName));
-    }
-  };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="default"
-          className="mb-4 hover:text-white transition-colors duration-200"
+          className="mb-4 w-full md:w-auto hover:text-white transition-colors duration-200"
         >
           Select a Feature
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="py-2 px-4 rounded-lg shadow-lg bg-white">
-        {columnNames.map((column: string, index: number) => (
-          <li
-            key={index}
-            className="flex items-center space-x-3 py-2 hover:bg-gray-100 rounded-md"
-          >
-            <Checkbox
-              id={index.toString()}
-              checked={selectedColumns.includes(column)}
-              onCheckedChange={(checked: boolean) =>
-                handleCheckboxChange(column, checked)
-              }
-              className="text-blue-600"
-            />
-            <div className="flex-1">
-              <label
-                htmlFor={index.toString()}
-                className="text-sm font-medium text-gray-700"
-              >
-                {column}
-              </label>
-            </div>
-          </li>
-        ))}
+      <DropdownMenuContent className="py-2 px-4 rounded-lg shadow-lg bg-white w-full md:w-56">
+        <DropdownMenuLabel className="text-center font-semibold text-gray-700">
+          Choose a Feature
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuRadioGroup
+          value={selectedColumn || ""}
+          onValueChange={(value) => setSelectedColumn(value)}
+        >
+          {columnNames.map((column: string, index: number) => (
+            <DropdownMenuRadioItem
+              key={index}
+              value={column}
+              className="py-2 hover:bg-gray-100"
+            >
+              {column}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
