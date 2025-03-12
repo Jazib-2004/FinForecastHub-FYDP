@@ -1,8 +1,7 @@
-"use client"
+"use client";
 
-import { TrendingUp } from "lucide-react"
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
-
+import { TrendingUp } from "lucide-react";
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import {
   Card,
   CardContent,
@@ -10,96 +9,146 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart"
-
-const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-]
+} from "@/components/ui/chart";
+import { Forecasts } from "@/app/types/forecast";
+import { transformForecastData } from "../transformforecast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const chartConfig = {
-  desktop: {
-    label: "Desktop",
-    color: "hsl(var(--chart-1))",
+  average_price: {
+    label: "Price Trend",
+    color: "hsl(var(--primary))",
   },
-  mobile: {
-    label: "Mobile",
-    color: "hsl(var(--chart-2))",
-  },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
-export function Areachart() {
+interface AreaChartProps {
+  forecasts?: Forecasts | null;
+}
+
+export function AreaChart1({ forecasts }: AreaChartProps) {
+  const chartData = transformForecastData(forecasts ?? {});
+  const dates = Object.keys(forecasts ?? {});
+  const hasData = chartData.length > 0;
+
+  const startDate = hasData
+    ? new Date(dates[0]).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+    : "N/A";
+
+  const endDate = hasData
+    ? new Date(dates[dates.length - 1]).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+    : "N/A";
+
   return (
-    <Card className="w-full sm:w-[300px] lg:w-[600px] mx-auto h-auto sm:h-[408px]">
-      <CardHeader>
-        <CardTitle>Area Chart - Stacked</CardTitle>
-        <CardDescription>
-          Showing total visitors for the last 6 months
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig}>
-          <AreaChart
-            accessibilityLayer
-            data={chartData}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent indicator="dot" />}
-            />
-            <Area
-              dataKey="mobile"
-              type="natural"
-              fill="var(--color-mobile)"
-              fillOpacity={0.4}
-              stroke="var(--color-mobile)"
-              stackId="a"
-            />
-            <Area
-              dataKey="desktop"
-              type="natural"
-              fill="var(--color-desktop)"
-              fillOpacity={0.4}
-              stroke="var(--color-desktop)"
-              stackId="a"
-            />
-          </AreaChart>
-        </ChartContainer>
-      </CardContent>
-      <CardFooter>
-        <div className="flex w-full items-start gap-2 text-sm">
-          <div className="grid gap-2">
-            <div className="flex items-center gap-2 font-medium leading-none">
-              {/* Any footer content */}
-            </div>
-            <div className="flex items-center gap-2 leading-none text-muted-foreground">
-              {/* Any additional footer content */}
-            </div>
+    <Card className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-0 shadow-xl">
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-lg font-semibold bg-gradient-to-r from-primary to-foreground bg-clip-text text-transparent">
+              Market Trend Analysis
+            </CardTitle>
+            <CardDescription className="mt-1 text-muted-foreground">
+              {hasData 
+                ? `Price forecast from ${startDate} to ${endDate}`
+                : "Awaiting dataset analysis"}
+            </CardDescription>
           </div>
+          <TrendingUp className="h-5 w-5 text-primary" />
+        </div>
+      </CardHeader>
+      
+      <CardContent className="relative">
+        {hasData ? (
+          <ChartContainer config={chartConfig}>
+            <AreaChart
+              data={chartData}
+              margin={{ top: 10, right: 0, left: 10, bottom: 0 }}
+              className="[&_.recharts-cartesian-grid-vertical]:opacity-0"
+            >
+              <defs>
+                <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.4}/>
+                  <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+
+              <XAxis
+                dataKey="date"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                tickFormatter={(value: Date) => 
+                  value.toLocaleDateString("en-US", { month: "short" })
+                }
+                padding={{ left: 20, right: 20 }}
+              />
+
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                stroke="hsl(var(--muted))"
+                vertical={false}
+              />
+
+              <ChartTooltip
+                cursor={{ stroke: "hsl(var(--primary))", strokeWidth: 1 }}
+                content={({ active, payload }) => (
+                  <div className="rounded-lg border bg-background px-3 py-2 shadow-sm">
+                    {payload?.map(({ value, color }) => (
+                      <div key="tooltip" className="flex items-center gap-2">
+                        <span 
+                          className="h-2 w-2 rounded-full" 
+                          style={{ backgroundColor: color }}
+                        />
+                        <span className="text-sm font-medium">
+                          ${Number(value).toLocaleString(undefined, {
+                            maximumFractionDigits: 0
+                          })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              />
+
+              <Area
+                type="monotone"
+                dataKey="average_price"
+                stroke="hsl(var(--primary))"
+                strokeWidth={2}
+                fill="url(#priceGradient)"
+                fillOpacity={1}
+                animationDuration={600}
+              />
+            </AreaChart>
+          </ChartContainer>
+        ) : (
+          <div className="h-[300px] flex flex-col items-center justify-center gap-4">
+            <div className="h-12 w-12 bg-muted rounded-full animate-pulse" />
+            <p className="text-muted-foreground text-center">
+              Analyzing market trends...
+              <br />
+              <span className="text-xs">This may take a moment</span>
+            </p>
+          </div>
+        )}
+      </CardContent>
+
+      <CardFooter className="pt-0">
+        <div className="flex items-center justify-between w-full text-sm text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-primary" />
+            Current price trend
+          </span>
+          <span className="text-right">
+            {hasData ? "Updated today" : "Waiting for data"}
+          </span>
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }

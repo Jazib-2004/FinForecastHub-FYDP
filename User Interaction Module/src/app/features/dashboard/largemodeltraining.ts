@@ -1,3 +1,4 @@
+
 export default async function largemodel(
     preprocessedData: Record<string, { [key: string]: any }>,
     featureName: string
@@ -31,6 +32,7 @@ export default async function largemodel(
       console.log("Status:", result.status);
       console.log("Message:", result.message);
       console.log("Forecasts:", result.forecasts);
+      return result; 
   
       // Further actions can be taken with `result.forecasts` if needed
     } catch (error) {

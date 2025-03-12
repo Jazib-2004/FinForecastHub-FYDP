@@ -41,7 +41,7 @@
   "self_attn": false,
   "self_attn_heads": 1,
   "torch_dtype": "float32",
-  "transformers_version": "4.47.0",
+  "transformers_version": "4.49.0",
   "use_decoder": true,
   "use_positional_encoding": false
 }
