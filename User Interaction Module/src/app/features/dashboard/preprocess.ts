@@ -6,11 +6,17 @@ interface Result {
   feature_name: string;
 }
 
-export default function Preprocess(parsedData: any, selectedColumns: string[]): void {
+export default function Preprocess(
+  parsedData: any,
+  selectedColumns: string[],
+  onModelResults: (results: any) => void // Add callback
+): void {
   const headers = Object.keys(parsedData.data[0]);
   const formattedDataset = [
     headers,
-    ...parsedData.data.map((row: any) => headers.map((key: string) => row[key])),
+    ...parsedData.data.map((row: any) =>
+      headers.map((key: string) => row[key])
+    ),
   ];
 
   console.log("Sending JSON data:", {
@@ -42,7 +48,7 @@ export default function Preprocess(parsedData: any, selectedColumns: string[]): 
       console.log(`Preprocessed Data:`, data.preprocessed_data);
 
       // Call training with the correct arguments
-      training(data.preprocessed_data, data.feature_name);
+      training(data.preprocessed_data, data.feature_name, onModelResults);
     })
     .catch((error) => {
       console.error("Error during preprocessing:", error);

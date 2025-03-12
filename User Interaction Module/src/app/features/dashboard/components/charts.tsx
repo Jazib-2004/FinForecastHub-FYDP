@@ -1,17 +1,19 @@
-import { Areachart } from "./areachart";
-import { Piechart } from "./piechart";
+import { Forecasts } from "@/app/types/forecast";
+import { AreaChart1 } from "./areachart";
+import { PieChart1 } from "./piechart";
 
-export default function Charts() {
+interface ChartProps {
+  forecasts: Forecasts;
+}
+
+export default function Charts({ forecasts }: ChartProps) {
   return (
-    <div className="flex flex-col sm:flex-row w-full justify-evenly space-y-6 sm:space-y-0 sm:space-x-6 h-full">
-      {/* Area Chart */}
-      <div className="flex-1">
-        <Areachart />
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+      <div className="bg-white p-6 rounded-xl shadow-sm">
+        <AreaChart1 forecasts={forecasts} />
       </div>
-      
-      {/* Pie Chart */}
-      <div className="flex-1">
-        <Piechart />
+      <div className="bg-white p-6 rounded-xl shadow-sm">
+        <PieChart1 forecasts={forecasts} />
       </div>
     </div>
   );
