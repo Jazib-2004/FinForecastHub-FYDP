@@ -16,16 +16,10 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Forecasts } from "@/app/types/forecast";
+import { Forecasts, TransformedForecast } from "@/app/types/forecast";
 import { transformForecastData } from "../transformforecast";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const chartConfig = {
-  average_price: {
-    label: "Price Trend",
-    color: "hsl(var(--primary))",
-  },
-} satisfies ChartConfig;
+import { useMemo } from "react";
 
 interface AreaChartProps {
   forecasts?: Forecasts | null;
@@ -36,12 +30,35 @@ export function AreaChart1({ forecasts }: AreaChartProps) {
   const dates = Object.keys(forecasts ?? {});
   const hasData = chartData.length > 0;
 
+  // Dynamically get the metric name from the first data point
+  const metricName = useMemo(
+    () => (hasData ? chartData[0].metric : "average_price"),
+    [chartData, hasData]
+  );
+
+  // Dynamic chart configuration
+  const chartConfig = useMemo<ChartConfig>(
+    () => ({
+      [metricName]: {
+        label: `${metricName} Trend`,
+        color: "hsl(var(--primary))",
+      },
+    }),
+    [metricName]
+  );
+
   const startDate = hasData
-    ? new Date(dates[0]).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+    ? new Date(dates[0]).toLocaleDateString("en-US", {
+        month: "short",
+        year: "numeric",
+      })
     : "N/A";
 
   const endDate = hasData
-    ? new Date(dates[dates.length - 1]).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+    ? new Date(dates[dates.length - 1]).toLocaleDateString("en-US", {
+        month: "short",
+        year: "numeric",
+      })
     : "N/A";
 
   return (
@@ -53,15 +70,15 @@ export function AreaChart1({ forecasts }: AreaChartProps) {
               Market Trend Analysis
             </CardTitle>
             <CardDescription className="mt-1 text-muted-foreground">
-              {hasData 
-                ? `Price forecast from ${startDate} to ${endDate}`
+              {hasData
+                ? `${metricName} forecast from ${startDate} to ${endDate}`
                 : "Awaiting dataset analysis"}
             </CardDescription>
           </div>
           <TrendingUp className="h-5 w-5 text-primary" />
         </div>
       </CardHeader>
-      
+
       <CardContent className="relative">
         {hasData ? (
           <ChartContainer config={chartConfig}>
@@ -71,9 +88,17 @@ export function AreaChart1({ forecasts }: AreaChartProps) {
               className="[&_.recharts-cartesian-grid-vertical]:opacity-0"
             >
               <defs>
-                <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.4}/>
-                  <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0}/>
+                <linearGradient id="valueGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="5%"
+                    stopColor="hsl(var(--chart-2))"
+                    stopOpacity={0.4}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="hsl(var(--chart-2))"
+                    stopOpacity={0}
+                  />
                 </linearGradient>
               </defs>
 
@@ -82,45 +107,64 @@ export function AreaChart1({ forecasts }: AreaChartProps) {
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                tickFormatter={(value: Date) => 
+                tickFormatter={(value: Date) =>
                   value.toLocaleDateString("en-US", { month: "short" })
                 }
                 padding={{ left: 20, right: 20 }}
               />
 
-              <CartesianGrid 
-                strokeDasharray="3 3" 
+              <CartesianGrid
+                strokeDasharray="3 3"
                 stroke="hsl(var(--muted))"
                 vertical={false}
               />
 
               <ChartTooltip
                 cursor={{ stroke: "hsl(var(--primary))", strokeWidth: 1 }}
-                content={({ active, payload }) => (
-                  <div className="rounded-lg border bg-background px-3 py-2 shadow-sm">
-                    {payload?.map(({ value, color }) => (
-                      <div key="tooltip" className="flex items-center gap-2">
-                        <span 
-                          className="h-2 w-2 rounded-full" 
-                          style={{ backgroundColor: color }}
+                content={({ active, payload }) => {
+                  if (!active || !payload || payload.length === 0) return null;
+
+                  const dataPoint = payload[0].payload; // Get full data point
+                  return (
+                    <div className="rounded-lg border bg-background px-3 py-2 shadow-sm">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="h-2 w-2 rounded-full"
+                          style={{ backgroundColor: payload[0].color }}
                         />
-                        <span className="text-sm font-medium">
-                          ${Number(value).toLocaleString(undefined, {
-                            maximumFractionDigits: 0
-                          })}
-                        </span>
+                        <div>
+                          <p className="text-sm font-medium">
+                            {dataPoint.metric} {/* Dynamic metric name */}
+                          </p>
+                          <p className="text-sm">
+                            $
+                            {Number(dataPoint.value).toLocaleString(undefined, {
+                              maximumFractionDigits: 0,
+                            })}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(dataPoint.date).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              }
+                            )}
+                          </p>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                )}
+                    </div>
+                  );
+                }}
               />
 
               <Area
                 type="monotone"
-                dataKey="average_price"
+                dataKey="value"
                 stroke="hsl(var(--primary))"
                 strokeWidth={2}
-                fill="url(#priceGradient)"
+                fill="url(#valueGradient)"
                 fillOpacity={1}
                 animationDuration={600}
               />
@@ -142,7 +186,7 @@ export function AreaChart1({ forecasts }: AreaChartProps) {
         <div className="flex items-center justify-between w-full text-sm text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-primary" />
-            Current price trend
+            Current {metricName?.toLowerCase()} trend
           </span>
           <span className="text-right">
             {hasData ? "Updated today" : "Waiting for data"}

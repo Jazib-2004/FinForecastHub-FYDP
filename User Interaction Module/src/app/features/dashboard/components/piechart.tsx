@@ -15,10 +15,10 @@ import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Forecasts } from "@/app/types/forecast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TransformedForecast } from "@/app/types/forecast";
 
 const colors = [
   "hsl(var(--chart-1))",
@@ -28,41 +28,50 @@ const colors = [
   "hsl(var(--chart-5))",
 ];
 
-const chartConfig = {
-  average_price: {
-    label: "Revenue Distribution",
-    color: "hsl(var(--primary))",
-  },
-} satisfies ChartConfig;
-
 interface PieChartProps {
   forecasts?: Forecasts | null;
 }
 
 export function PieChart1({ forecasts }: PieChartProps) {
-  const { chartData, total } = React.useMemo(() => {
-    if (!forecasts) return { chartData: [], total: 0 };
+  const { chartData, total, metricName } = React.useMemo(() => {
+    if (!forecasts) return { chartData: [], total: 0, metricName: "metric" };
 
-    const sorted = Object.entries(forecasts)
-      .map(([date, data]) => ({
+    // Transform data to handle dynamic metrics
+    const transformed = Object.entries(forecasts).map(([date, data]) => {
+      const [metric, value] = Object.entries(data)[0];
+      return {
         date: new Date(date),
         monthYear: new Date(date).toLocaleDateString("en-US", {
           month: "short",
           year: "numeric",
         }),
-        average_price: data.average_price,
-      }))
-      .sort((a, b) => b.average_price - a.average_price);
+        metric,
+        value,
+      };
+    });
 
+    const sorted = transformed.sort((a, b) => b.value - a.value);
     const top5 = sorted.slice(0, 5).map((item, index) => ({
       ...item,
       fill: colors[index % colors.length],
     }));
 
-    const total = top5.reduce((acc, curr) => acc + curr.average_price, 0);
+    const total = top5.reduce((acc, curr) => acc + curr.value, 0);
+    const metricName = top5[0]?.metric || "metric";
 
-    return { chartData: top5, total };
+    return { chartData: top5, total, metricName };
   }, [forecasts]);
+
+  // Dynamic chart configuration
+  const chartConfig = React.useMemo<ChartConfig>(
+    () => ({
+      [metricName]: {
+        label: `${metricName} Distribution`,
+        color: colors[0],
+      },
+    }),
+    [metricName]
+  );
 
   return (
     <Card className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-0 shadow-xl">
@@ -73,8 +82,8 @@ export function PieChart1({ forecasts }: PieChartProps) {
               Top Performers
             </CardTitle>
             <CardDescription className="mt-1 text-muted-foreground">
-              {chartData.length > 0 
-                ? "5 most profitable months" 
+              {chartData.length > 0
+                ? `5 highest ${metricName.toLowerCase()} months`
                 : "Awaiting dataset analysis"}
             </CardDescription>
           </div>
@@ -88,7 +97,7 @@ export function PieChart1({ forecasts }: PieChartProps) {
             <PieChart className="mx-auto aspect-square max-h-[250px]">
               <Pie
                 data={chartData}
-                dataKey="average_price"
+                dataKey="value"
                 nameKey="monthYear"
                 innerRadius={70}
                 outerRadius={110}
@@ -129,20 +138,31 @@ export function PieChart1({ forecasts }: PieChartProps) {
               <ChartTooltip
                 content={({ active, payload }) => (
                   <div className="rounded-lg border bg-background px-3 py-2 shadow-sm">
-                    {payload?.map((item) => (
-                      <div key={item.name} className="flex items-center gap-2">
-                        <span
-                          className="h-2 w-2 rounded-full"
-                          style={{ backgroundColor: item.color }}
-                        />
-                        <div>
-                          <p className="text-sm font-medium">{item.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            ${Number(item.value).toLocaleString()}
-                          </p>
+                    {payload?.map((item) => {
+                      const dataPoint = item.payload?.payload;
+                      return (
+                        <div
+                          key={item.name}
+                          className="flex items-center gap-2"
+                        >
+                          <span
+                            className="h-2 w-2 rounded-full"
+                            style={{ backgroundColor: item.color }}
+                          />
+                          <div>
+                            <p className="text-sm font-medium">{item.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {dataPoint?.metric}:{" "}
+                              {Number(item.value).toLocaleString(undefined, {
+                                style: "currency",
+                                currency: "USD",
+                                maximumFractionDigits: 0,
+                              })}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               />
@@ -152,7 +172,7 @@ export function PieChart1({ forecasts }: PieChartProps) {
           <div className="h-[300px] flex flex-col items-center justify-center gap-4">
             <div className="h-12 w-12 bg-muted rounded-full animate-pulse" />
             <p className="text-muted-foreground text-center">
-              Analyzing revenue distribution...
+              Analyzing distribution...
               <br />
               <span className="text-xs">This may take a moment</span>
             </p>
@@ -163,8 +183,8 @@ export function PieChart1({ forecasts }: PieChartProps) {
       <CardFooter className="pt-0">
         <div className="flex items-center justify-between w-full text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            {chartData.slice(0,3).map((item, index) => (
-              <span 
+            {chartData.slice(0, 3).map((item, index) => (
+              <span
                 key={index}
                 className="h-2 w-2 rounded-full"
                 style={{ backgroundColor: item.fill }}
