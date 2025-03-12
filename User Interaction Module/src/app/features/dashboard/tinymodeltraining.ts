@@ -31,6 +31,7 @@ export default async function tinymodel(
       console.log("Status:", result.status);
       console.log("Message:", result.message);
       console.log("Forecasts:", result.forecasts);
+      return result;
   
       // Further actions can be taken with `result.forecasts` if needed
     } catch (error) {
