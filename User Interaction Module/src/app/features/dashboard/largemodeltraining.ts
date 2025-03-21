@@ -2,7 +2,7 @@
 export default async function largemodel(
     preprocessedData: Record<string, { [key: string]: any }>,
     featureName: string
-  ): Promise<void> {
+  ): Promise<any> {
     console.log("Large model training started...");
     console.log("Feature Name:", featureName);
     console.log("Preprocessed Data:", preprocessedData);
@@ -26,13 +26,19 @@ export default async function largemodel(
   
       // Parse the response
       const result = await response.json();
+      const datatype = 'Large';
+      
+
   
       // Log the result
       console.log("Training completed successfully!");
       console.log("Status:", result.status);
       console.log("Message:", result.message);
       console.log("Forecasts:", result.forecasts);
-      return result; 
+      return {
+        ...result,
+        datatype: datatype
+      };
   
       // Further actions can be taken with `result.forecasts` if needed
     } catch (error) {

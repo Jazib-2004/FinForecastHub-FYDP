@@ -25,13 +25,18 @@ export default async function standardmodel(
   
       // Parse the response
       const result = await response.json();
+      const datatype = 'Standard';
   
       // Log the result
       console.log("Training completed successfully!");
       console.log("Status:", result.status);
       console.log("Message:", result.message);
       console.log("Forecasts:", result.forecasts);
-      return result;
+      return {
+        ...result,
+        datatype: datatype
+      };
+  
   
       // Further actions can be taken with `result.forecasts` if needed
     } catch (error) {

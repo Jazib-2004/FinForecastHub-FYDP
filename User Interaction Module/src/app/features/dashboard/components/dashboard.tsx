@@ -1,4 +1,3 @@
-// dashboard.tsx
 "use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,10 +12,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Charts from "./charts";
 import LandingLoaderPage from "../loader";
 
+
 type ModelResults = {
   status?: string;
   message?: string;
   forecasts?: Record<string, { average_price: number }>;
+  datatype?: string;
+};
+
+// Image path helper function
+const getImagePath = (datatype: string) => {
+  const basePath = "../../../../../../Core-AI Financial Forecasting Module/Results/";
+  switch (datatype) {
+    case "Large":
+      return `${basePath}Large Model/plots/out_sampling_forecasts.png`;
+    case "Standard": // Changed to match exact case
+      return `${basePath}Standard Model/plots/out_sampling_forecasts.png`;
+    case "Tiny":
+      return `${basePath}Tiny Model/plots/out_sampling_forecasts.png`;
+    default:
+      return "";
+  }
 };
 
 export default function Dashboard() {
@@ -93,7 +109,6 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col items-center w-full px-4 py-6 space-y-6 bg-gray-50 min-h-screen">
-      {/* Show loader when loading */}
       {isLoading && <LandingLoaderPage />}
 
       <Dashboardheader />
@@ -128,7 +143,7 @@ export default function Dashboard() {
                   className="w-full bg-indigo-600 hover:bg-indigo-700 text-white transition-colors"
                   disabled={isLoading}
                 >
-                 Analyze Dataset
+                  Analyze Dataset
                 </Button>
               </div>
 
@@ -160,7 +175,10 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Show charts only when we have results and not loading */}
+      {/* Dataset Type Display */}
+     
+
+      {/* Charts Display */}
       {!isLoading && modelResults?.forecasts && (
         <Charts forecasts={modelResults.forecasts} />
       )}

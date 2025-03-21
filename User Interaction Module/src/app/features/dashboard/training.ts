@@ -20,7 +20,7 @@ export default async function training(
   preprocessedData: Record<string, { [key: string]: any }>,
   featureName: string,
   callback: (results: TrainingResult) => void
-): Promise<void> {
+): Promise<any> {
   console.log("Training started...");
   console.log("Feature Name:", featureName);
 
@@ -41,7 +41,7 @@ export default async function training(
 
     const yearCount = years.size;
     let datasetType: DatasetType;
-    let results: TrainingResult | undefined;
+    let results: TrainingResult | any;
 
     // Determine dataset type and run appropriate model
     if (yearCount >= 2 && yearCount <= 5) {
