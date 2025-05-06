@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar/appsidebar";
 
 
 const nunitoSans = localFont({
@@ -31,11 +29,7 @@ export default function RootLayout({
       <body
         className={` ${nunitoSans.variable} ${nunitoSerif.variable} antialiased`}
       >
-        <SidebarProvider>
-          <AppSidebar />
-            <SidebarTrigger />
-            {children}
-        </SidebarProvider>
+        {children}
       </body>
     </html>
   );
