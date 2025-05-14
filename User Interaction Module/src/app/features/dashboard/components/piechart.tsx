@@ -110,8 +110,8 @@ export function PieChart1({ forecasts }: PieChartProps) {
                     if (viewBox && "cx" in viewBox && "cy" in viewBox) {
                       return (
                         <foreignObject
-                          x={viewBox.cx - 60}
-                          y={viewBox.cy - 30}
+                          x={viewBox.cx ?? 0 - 60}
+                          y={viewBox.cy ?? 0 - 30}
                           width={120}
                           height={60}
                           className="text-center"
