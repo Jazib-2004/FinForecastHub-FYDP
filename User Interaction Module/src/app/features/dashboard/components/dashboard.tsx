@@ -12,7 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Charts from "./charts";
 import LandingLoaderPage from "../loader";
 
-
 type ModelResults = {
   status?: string;
   message?: string;
@@ -22,7 +21,8 @@ type ModelResults = {
 
 // Image path helper function
 const getImagePath = (datatype: string) => {
-  const basePath = "../../../../../../Core-AI Financial Forecasting Module/Results/";
+  const basePath =
+    "../../../../../../Core-AI Financial Forecasting Module/Results/";
   switch (datatype) {
     case "Large":
       return `${basePath}Large Model/plots/out_sampling_forecasts.png`;
@@ -43,7 +43,8 @@ export default function Dashboard() {
   const [parsedResults, setParsedResults] = useState<any>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [validated, setValidated] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isTraining, setIsTraining] = useState(false);
 
   const handleFileChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -51,6 +52,8 @@ export default function Dashboard() {
     setShowError(false);
     setErrorMessage("");
   }, []);
+
+  // Update the handleSubmit and handleModelResults functions:
 
   const handleSubmit = useCallback(
     async (e: FormEvent) => {
@@ -62,7 +65,7 @@ export default function Dashboard() {
       }
 
       try {
-        setIsLoading(true);
+        setIsAnalyzing(true);
         const results = await new Promise<any>((resolve) => {
           Papa.parse(dataset, { complete: resolve });
         });
@@ -101,15 +104,19 @@ export default function Dashboard() {
         setShowError(true);
         setShowSuccess(false);
       } finally {
-        setIsLoading(false);
+        setIsAnalyzing(false);
       }
     },
     [dataset]
   );
 
+  const handleModelResults = useCallback((results: ModelResults) => {
+    setModelResults(results);
+  }, []);
+
   return (
     <div className="flex flex-col items-center w-full px-4 py-6 space-y-6 bg-gray-50 min-h-screen">
-      {isLoading && <LandingLoaderPage />}
+      {(isAnalyzing || isTraining) && <LandingLoaderPage />}
 
       <Dashboardheader />
       <Metadata />
@@ -141,9 +148,9 @@ export default function Dashboard() {
                 <Button
                   type="submit"
                   className="w-full bg-indigo-600 hover:bg-indigo-700 text-white transition-colors"
-                  disabled={isLoading}
+                  disabled={isAnalyzing || isTraining}
                 >
-                  Analyze Dataset
+                  {isAnalyzing ? "Analyzing..." : "Analyze Dataset"}
                 </Button>
               </div>
 
@@ -160,7 +167,8 @@ export default function Dashboard() {
                   <Featureselect
                     results={parsedResults}
                     parsedresults={parsedResults}
-                    onModelResults={setModelResults}
+                    onModelResults={handleModelResults}
+                    isTraining={isTraining}
                   />
                 </div>
               )}
@@ -176,10 +184,9 @@ export default function Dashboard() {
       </div>
 
       {/* Dataset Type Display */}
-     
 
       {/* Charts Display */}
-      {!isLoading && modelResults?.forecasts && (
+      {!isTraining && modelResults?.forecasts && (
         <Charts forecasts={modelResults.forecasts} />
       )}
     </div>
